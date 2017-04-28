@@ -348,11 +348,14 @@ class ODOO(object):
         """
         # Get the user's ID and generate the corresponding user record
         data = self.json(
-            '/web/session/authenticate',
-            {'db': db, 'login': login, 'password': password})
-        uid = data['result']['uid']
+            '/jsonrpc',
+            {'service': 'common', 'method': 'login', 'args': [db, login, password]})
+        uid = data['result']
+
         if uid:
-            context = data['result']['user_context']
+            context = {u'lang': u'en_GB', u'tz': u'Europe/Brussels', u'uid': 1}
+
+            #context = data['result']['user_context']
             self._env = Environment(self, db, uid, context=context)
             self._login = login
             self._password = password
@@ -476,6 +479,7 @@ class ODOO(object):
         args_to_send = [self.env.db, self.env.uid, self._password,
                         model, method]
         args_to_send.extend([args, kwargs])
+        print args_to_send
         data = self.json(
             '/jsonrpc',
             {'service': 'object',
